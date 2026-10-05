@@ -8,6 +8,22 @@ export const styles = StyleSheet.create({
     color: "#0f172a",
     marginBottom: 12,
   },
+  ringkasanRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  ringkasanItem: {
+    flex: 1,
+    backgroundColor: "white",
+    padding: 12,
+    borderRadius: 12,
+    marginHorizontal: 4,
+    alignItems: "center",
+    elevation: 2,
+    shadowColor: "#000",
+  },
+  ringkasanLabel: { fontSize: 12, color: "#475569", marginTop: 2 },
   searchInput: {
     borderWidth: 1,
     borderColor: "#cbd5e1",
