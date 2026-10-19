@@ -1,139 +1,41 @@
 import { useState } from "react";
-import { FlatList, Text, TextInput, View } from "react-native";
-import { StatusTugas, Tugas } from "../../types/tugas";
+import { View, Text, TextInput, FlatList } from "react-native";
 import { styles } from "../constants/styles"; // kalau constants dipindah ke root: "../../constants/styles"
+import { Tugas, StatusTugas } from "../../types/tugas";
 
 // Array of objects bertipe Tugas[]
 const dataTugas: Tugas[] = [
-  {
-    id: "1",
-    judul: "Laporan Praktikum Modul 1",
-    matkul: "Pemrograman Mobile",
-    deadline: "2026-10-10",
-    status: "belum",
-  },
-  {
-    id: "2",
-    judul: "Tugas Basis Data - Normalisasi",
-    matkul: "Basis Data",
-    deadline: "2026-10-08",
-    status: "proses",
-  },
-  {
-    id: "3",
-    judul: "Essay Etika Profesi",
-    matkul: "Etika Profesi",
-    deadline: "2026-10-05",
-    status: "selesai",
-  },
-  {
-    id: "4",
-    judul: "Implementasi Linked List",
-    matkul: "Struktur Data",
-    deadline: "2026-10-12",
-    status: "proses",
-  },
-  {
-    id: "5",
-    judul: "Quiz Penjadwalan CPU",
-    matkul: "Sistem Operasi",
-    deadline: "2026-10-07",
-    status: "selesai",
-  },
-  {
-    id: "6",
-    judul: "Dokumen SRS Aplikasi Kasir",
-    matkul: "Rekayasa Perangkat Lunak",
-    deadline: "2026-10-14",
-    status: "belum",
-  },
-  {
-    id: "7",
-    judul: "Makalah Algoritma A*",
-    matkul: "Kecerdasan Buatan",
-    deadline: "2026-10-16",
-    status: "proses",
-  },
-  {
-    id: "8",
-    judul: "Render Objek 3D Sederhana",
-    matkul: "Grafika Komputer",
-    deadline: "2026-10-18",
-    status: "belum",
-  },
-  {
-    id: "9",
-    judul: "Latihan Query JOIN Oracle SQL",
-    matkul: "Basis Data",
-    deadline: "2026-10-06",
-    status: "selesai",
-  },
-  {
-    id: "10",
-    judul: "Laporan Praktikum Modul 2",
-    matkul: "Pemrograman Mobile",
-    deadline: "2026-10-20",
-    status: "belum",
-  },
-  {
-    id: "11",
-    judul: "Tugas Stack dan Queue",
-    matkul: "Struktur Data",
-    deadline: "2026-10-09",
-    status: "selesai",
-  },
-  {
-    id: "12",
-    judul: "Studi Kasus Deadlock",
-    matkul: "Sistem Operasi",
-    deadline: "2026-10-13",
-    status: "proses",
-  },
-  {
-    id: "13",
-    judul: "Diagram UML Use Case",
-    matkul: "Rekayasa Perangkat Lunak",
-    deadline: "2026-10-11",
-    status: "proses",
-  },
-  {
-    id: "14",
-    judul: "Presentasi Kode Etik Profesi",
-    matkul: "Etika Profesi",
-    deadline: "2026-10-22",
-    status: "belum",
-  },
-  {
-    id: "15",
-    judul: "Klasifikasi Sederhana dengan Decision Tree",
-    matkul: "Kecerdasan Buatan",
-    deadline: "2026-10-25",
-    status: "belum",
-  },
+  { id: "1", judul: "Laporan Praktikum Modul 1", matkul: "Pemrograman Mobile", deadline: "2026-10-10", status: "belum" },
+  { id: "2", judul: "Tugas Basis Data - Normalisasi", matkul: "Basis Data", deadline: "2026-10-08", status: "proses" },
+  { id: "3", judul: "Essay Etika Profesi", matkul: "Etika Profesi", deadline: "2026-10-05", status: "selesai" },
+  { id: "4", judul: "Implementasi Linked List", matkul: "Struktur Data", deadline: "2026-10-12", status: "proses" },
+  { id: "5", judul: "Quiz Penjadwalan CPU", matkul: "Sistem Operasi", deadline: "2026-10-07", status: "selesai" },
+  { id: "6", judul: "Dokumen SRS Aplikasi Kasir", matkul: "Rekayasa Perangkat Lunak", deadline: "2026-10-14", status: "belum" },
+  { id: "7", judul: "Makalah Algoritma A*", matkul: "Kecerdasan Buatan", deadline: "2026-10-16", status: "proses" },
+  { id: "8", judul: "Render Objek 3D Sederhana", matkul: "Grafika Komputer", deadline: "2026-10-18", status: "belum" },
+  { id: "9", judul: "Latihan Query JOIN Oracle SQL", matkul: "Basis Data", deadline: "2026-10-06", status: "selesai" },
+  { id: "10", judul: "Laporan Praktikum Modul 2", matkul: "Pemrograman Mobile", deadline: "2026-10-20", status: "belum" },
+  { id: "11", judul: "Tugas Stack dan Queue", matkul: "Struktur Data", deadline: "2026-10-09", status: "selesai" },
+  { id: "12", judul: "Studi Kasus Deadlock", matkul: "Sistem Operasi", deadline: "2026-10-13", status: "proses" },
+  { id: "13", judul: "Diagram UML Use Case", matkul: "Rekayasa Perangkat Lunak", deadline: "2026-10-11", status: "proses" },
+  { id: "14", judul: "Presentasi Kode Etik Profesi", matkul: "Etika Profesi", deadline: "2026-10-22", status: "belum" },
+  { id: "15", judul: "Klasifikasi Sederhana dengan Decision Tree", matkul: "Kecerdasan Buatan", deadline: "2026-10-25", status: "belum" }
 ];
 
 const daftarStatus: StatusTugas[] = ["belum", "proses", "selesai"];
 
 // Custom function 1: warna badge sesuai status
 function getStatusColor(status: StatusTugas): string {
-  if (status === "selesai") {
-    return "#22c55e";
-  } else if (status === "proses") {
-    return "#eab308";
-  } else {
-    return "#ef4444";
-  }
+  if (status === "selesai") { return "#22c55e"; }
+  else if (status === "proses") { return "#eab308"; }
+  else { return "#ef4444"; }
 }
 
 // Custom function 2: teks badge sesuai status
 function getStatusLabel(status: StatusTugas): string {
-  if (status === "selesai") {
-    return "Selesai";
-  } else if (status === "proses") {
-    return "Dikerjakan";
-  } else {
-    return "Belum Mulai";
-  }
+  if (status === "selesai") { return "Selesai"; }
+  else if (status === "proses") { return "Dikerjakan"; }
+  else { return "Belum Mulai"; }
 }
 
 // Custom function 3: warna deadline (abu-abu kalau sudah selesai)
@@ -160,7 +62,7 @@ export default function Index() {
   const hasil = dataTugas.filter(
     (item) =>
       item.judul.toLowerCase().includes(kataKunci.toLowerCase()) ||
-      item.matkul.toLowerCase().includes(kataKunci.toLowerCase()),
+      item.matkul.toLowerCase().includes(kataKunci.toLowerCase())
   );
 
   return (
@@ -171,13 +73,7 @@ export default function Index() {
       <View style={styles.ringkasanRow}>
         {daftarStatus.map((s) => (
           <View key={s} style={styles.ringkasanItem}>
-            <Text
-              style={{
-                fontSize: 22,
-                fontWeight: "bold",
-                color: getStatusColor(s),
-              }}
-            >
+            <Text style={{ fontSize: 22, fontWeight: "bold", color: getStatusColor(s) }}>
               {hitungStatus(s)}
             </Text>
             <Text style={styles.ringkasanLabel}>{getStatusLabel(s)}</Text>
@@ -197,9 +93,7 @@ export default function Index() {
         data={hasil}
         keyExtractor={(item) => item.id}
         ListEmptyComponent={
-          <Text
-            style={{ textAlign: "center", color: "#94a3b8", marginTop: 24 }}
-          >
+          <Text style={{ textAlign: "center", color: "#94a3b8", marginTop: 24 }}>
             Tugas tidak ditemukan
           </Text>
         }
@@ -208,26 +102,12 @@ export default function Index() {
             <View style={styles.cardHeader}>
               <Text style={styles.judul}>{item.judul}</Text>
               {/* Inline style dinamis */}
-              <View
-                style={{
-                  backgroundColor: getStatusColor(item.status),
-                  borderRadius: 8,
-                  paddingHorizontal: 8,
-                  paddingVertical: 4,
-                }}
-              >
-                <Text style={{ color: "white", fontSize: 12 }}>
-                  {getStatusLabel(item.status)}
-                </Text>
+              <View style={{ backgroundColor: getStatusColor(item.status), borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 }}>
+                <Text style={{ color: "white", fontSize: 12 }}>{getStatusLabel(item.status)}</Text>
               </View>
             </View>
             <Text style={styles.matkul}>{item.matkul}</Text>
-            <Text
-              style={[
-                styles.deadline,
-                { color: getDeadlineColor(item.status) },
-              ]}
-            >
+            <Text style={[styles.deadline, { color: getDeadlineColor(item.status) }]}>
               Deadline: {item.deadline}
             </Text>
           </View>
