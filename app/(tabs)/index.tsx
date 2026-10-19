@@ -1,65 +1,46 @@
-import { useState } from "react";
-import { View, Text, TextInput, FlatList } from "react-native";
-import { styles } from "../constants/styles"; // kalau constants dipindah ke root: "../../constants/styles"
-import { Tugas, StatusTugas } from "../../types/tugas";
+import { useState, useEffect } from "react";
+import { View, Text, TextInput, FlatList, Pressable } from "react-native";
+import { useRouter } from "expo-router";
+import { styles } from "@/app/constants/styles";
+import { Tugas, StatusTugas } from "@/types/tugas";
+import { useTugas } from "@/context/TugasContext";
+import { daftarStatus, getStatusColor, getStatusLabel, getDeadlineColor } from "@/utils/status";
 
-// Array of objects bertipe Tugas[]
-const dataTugas: Tugas[] = [
-  { id: "1", judul: "Laporan Praktikum Modul 1", matkul: "Pemrograman Mobile", deadline: "2026-10-10", status: "belum" },
-  { id: "2", judul: "Tugas Basis Data - Normalisasi", matkul: "Basis Data", deadline: "2026-10-08", status: "proses" },
-  { id: "3", judul: "Essay Etika Profesi", matkul: "Etika Profesi", deadline: "2026-10-05", status: "selesai" },
-  { id: "4", judul: "Implementasi Linked List", matkul: "Struktur Data", deadline: "2026-10-12", status: "proses" },
-  { id: "5", judul: "Quiz Penjadwalan CPU", matkul: "Sistem Operasi", deadline: "2026-10-07", status: "selesai" },
-  { id: "6", judul: "Dokumen SRS Aplikasi Kasir", matkul: "Rekayasa Perangkat Lunak", deadline: "2026-10-14", status: "belum" },
-  { id: "7", judul: "Makalah Algoritma A*", matkul: "Kecerdasan Buatan", deadline: "2026-10-16", status: "proses" },
-  { id: "8", judul: "Render Objek 3D Sederhana", matkul: "Grafika Komputer", deadline: "2026-10-18", status: "belum" },
-  { id: "9", judul: "Latihan Query JOIN Oracle SQL", matkul: "Basis Data", deadline: "2026-10-06", status: "selesai" },
-  { id: "10", judul: "Laporan Praktikum Modul 2", matkul: "Pemrograman Mobile", deadline: "2026-10-20", status: "belum" },
-  { id: "11", judul: "Tugas Stack dan Queue", matkul: "Struktur Data", deadline: "2026-10-09", status: "selesai" },
-  { id: "12", judul: "Studi Kasus Deadlock", matkul: "Sistem Operasi", deadline: "2026-10-13", status: "proses" },
-  { id: "13", judul: "Diagram UML Use Case", matkul: "Rekayasa Perangkat Lunak", deadline: "2026-10-11", status: "proses" },
-  { id: "14", judul: "Presentasi Kode Etik Profesi", matkul: "Etika Profesi", deadline: "2026-10-22", status: "belum" },
-  { id: "15", judul: "Klasifikasi Sederhana dengan Decision Tree", matkul: "Kecerdasan Buatan", deadline: "2026-10-25", status: "belum" }
-];
-
-const daftarStatus: StatusTugas[] = ["belum", "proses", "selesai"];
-
-// Custom function 1: warna badge sesuai status
-function getStatusColor(status: StatusTugas): string {
-  if (status === "selesai") { return "#22c55e"; }
-  else if (status === "proses") { return "#eab308"; }
-  else { return "#ef4444"; }
-}
-
-// Custom function 2: teks badge sesuai status
-function getStatusLabel(status: StatusTugas): string {
-  if (status === "selesai") { return "Selesai"; }
-  else if (status === "proses") { return "Dikerjakan"; }
-  else { return "Belum Mulai"; }
-}
-
-// Custom function 3: warna deadline (abu-abu kalau sudah selesai)
-function getDeadlineColor(status: StatusTugas): string {
-  return status === "selesai" ? "#94a3b8" : "#ef4444";
-}
-
-// Custom function 4: hitung jumlah tugas per status (primitive loop for)
-function hitungStatus(status: StatusTugas): number {
+// Custom function: hitung jumlah tugas per status (primitive loop for)
+function hitungStatus(daftar: Tugas[], status: StatusTugas): number {
   let total = 0;
-  for (let i = 0; i < dataTugas.length; i++) {
-    if (dataTugas[i].status === status) {
+  for (let i = 0; i < daftar.length; i++) {
+    if (daftar[i].status === status) {
       total = total + 1;
     }
   }
   return total;
 }
 
+// Custom function: dijalankan saat kotak ringkasan ditekan
+function tampilkanHello() {
+  console.log("Hello World");
+}
+
 export default function Index() {
-  // Papan tulis kecil: menyimpan teks pencarian
+  const router = useRouter();
+  const { daftarTugas } = useTugas();
+
+  // State: teks pencarian
   const [kataKunci, setKataKunci] = useState("");
 
+  // useEffect dengan [] : jalan sekali saat halaman pertama dimuat
+  useEffect(() => {
+    console.log("Halaman daftar tugas dimuat");
+  }, []);
+
+  // useEffect dengan [kataKunci] : jalan setiap kata kunci berubah
+  useEffect(() => {
+    console.log(`Kata kunci pencarian: "${kataKunci}"`);
+  }, [kataKunci]);
+
   // Saring tugas: judul atau matkul harus mengandung kata kunci
-  const hasil = dataTugas.filter(
+  const hasil = daftarTugas.filter(
     (item) =>
       item.judul.toLowerCase().includes(kataKunci.toLowerCase()) ||
       item.matkul.toLowerCase().includes(kataKunci.toLowerCase())
@@ -69,17 +50,26 @@ export default function Index() {
     <View style={styles.container}>
       <Text style={styles.header}>Tracker Tugas Kuliah</Text>
 
-      {/* Ringkasan: loop dengan map(), key = status */}
+      {/* Ringkasan: loop dengan map(), tiap kotak adalah tombol (Pressable) */}
       <View style={styles.ringkasanRow}>
         {daftarStatus.map((s) => (
-          <View key={s} style={styles.ringkasanItem}>
+          <Pressable
+            key={s}
+            onPress={tampilkanHello}
+            style={({ pressed }) => [styles.ringkasanItem, { opacity: pressed ? 0.5 : 1 }]}
+          >
             <Text style={{ fontSize: 22, fontWeight: "bold", color: getStatusColor(s) }}>
-              {hitungStatus(s)}
+              {hitungStatus(daftarTugas, s)}
             </Text>
             <Text style={styles.ringkasanLabel}>{getStatusLabel(s)}</Text>
-          </View>
+          </Pressable>
         ))}
       </View>
+
+      {/* router.push: pindah ke halaman tambah (ditumpuk di atas halaman ini) */}
+      <Pressable style={styles.tombol} onPress={() => router.push("/tambah")}>
+        <Text style={styles.tombolText}>+ Tambah Tugas</Text>
+      </Pressable>
 
       <TextInput
         placeholder="Cari tugas..."
@@ -88,7 +78,6 @@ export default function Index() {
         onChangeText={setKataKunci}
       />
 
-      {/* Daftar tugas: pakai hasil saringan, bukan dataTugas langsung */}
       <FlatList
         data={hasil}
         keyExtractor={(item) => item.id}
@@ -98,7 +87,11 @@ export default function Index() {
           </Text>
         }
         renderItem={({ item }) => (
-          <View style={styles.card}>
+          // router.push dengan parameter dinamis: id dikirim ke detail/[id]
+          <Pressable
+            style={styles.card}
+            onPress={() => router.push({ pathname: "/detail/[id]", params: { id: item.id } })}
+          >
             <View style={styles.cardHeader}>
               <Text style={styles.judul}>{item.judul}</Text>
               {/* Inline style dinamis */}
@@ -110,7 +103,7 @@ export default function Index() {
             <Text style={[styles.deadline, { color: getDeadlineColor(item.status) }]}>
               Deadline: {item.deadline}
             </Text>
-          </View>
+          </Pressable>
         )}
       />
     </View>
