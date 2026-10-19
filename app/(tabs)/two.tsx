@@ -1,31 +1,57 @@
-import { StyleSheet } from 'react-native';
+import { styles } from "@/app/constants/styles";
+import { useTugas } from "@/context/TugasContext";
+import { getDeadlineColor, getStatusLabel } from "@/utils/status";
+import { useRouter } from "expo-router";
+import { useMemo } from "react";
+import { Pressable, Text, View } from "react-native";
 
-import EditScreenInfo from '@/components/EditScreenInfo';
-import { Text, View } from '@/components/Themed';
+export default function Statistik() {
+  const router = useRouter();
+  const { daftarTugas } = useTugas();
 
-export default function TabTwoScreen() {
+  // useMemo: hitung ulang hanya kalau daftarTugas berubah
+  const ringkasan = useMemo(() => {
+    const total = daftarTugas.length;
+    const selesai = daftarTugas.filter((t) => t.status === "selesai").length;
+    const persen = total === 0 ? 0 : Math.round((selesai / total) * 100);
+    const terdekat = daftarTugas
+      .filter((t) => t.status !== "selesai")
+      .sort((a, b) => a.deadline.localeCompare(b.deadline))
+      .slice(0, 3);
+    return { total, selesai, persen, terdekat };
+  }, [daftarTugas]);
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Tab Two</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/two.tsx" />
+      <View style={styles.card}>
+        <Text style={styles.matkul}>Tugas yang sudah selesai</Text>
+        <Text style={styles.statAngka}>{ringkasan.persen}%</Text>
+        <Text style={styles.matkul}>
+          {ringkasan.selesai} dari {ringkasan.total} tugas
+        </Text>
+      </View>
+
+      <Text style={styles.subJudul}>Deadline Terdekat</Text>
+
+      {ringkasan.terdekat.map((item) => (
+        <Pressable
+          key={item.id}
+          style={styles.card}
+          onPress={() =>
+            router.push({ pathname: "/detail/[id]", params: { id: item.id } })
+          }
+        >
+          <Text style={styles.judul}>{item.judul}</Text>
+          <Text style={styles.matkul}>
+            {item.matkul} - {getStatusLabel(item.status)}
+          </Text>
+          <Text
+            style={[styles.deadline, { color: getDeadlineColor(item.status) }]}
+          >
+            Deadline: {item.deadline}
+          </Text>
+        </Pressable>
+      ))}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
-  },
-});
