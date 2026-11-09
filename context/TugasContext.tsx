@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 import { Tugas } from "@/types/tugas";
 import { getStatusBerikutnya } from "@/utils/status";
+import { ambilTugasDariApi } from "@/services/tugasService";
 
 const dataAwal: Tugas[] = [
   { id: "1", judul: "Laporan Praktikum Modul 1", matkul: "Pemrograman Mobile", deadline: "2026-10-10", status: "belum" },
@@ -22,9 +23,12 @@ const dataAwal: Tugas[] = [
 
 interface TugasContextType {
   daftarTugas: Tugas[];
+  sedangMemuat: boolean;
+  pesanError: string;
   tambahTugas: (judul: string, matkul: string, deadline: string) => void;
   ubahStatus: (id: string) => void;
   hapusTugas: (id: string) => void;
+  muatDariApi: () => void;
 }
 
 // Papan pengumuman bersama: nilai default null
@@ -32,6 +36,8 @@ const TugasContext = createContext<TugasContextType | null>(null);
 
 export function TugasProvider({ children }: { children: ReactNode }) {
   const [daftarTugas, setDaftarTugas] = useState<Tugas[]>(dataAwal);
+  const [sedangMemuat, setSedangMemuat] = useState(false);
+  const [pesanError, setPesanError] = useState("");
 
   function tambahTugas(judul: string, matkul: string, deadline: string) {
     const tugasBaru: Tugas = {
@@ -56,8 +62,28 @@ export function TugasProvider({ children }: { children: ReactNode }) {
     setDaftarTugas(daftarTugas.filter((t) => t.id !== id));
   }
 
+  // Ambil tugas dari API memakai .then() / .catch() / .finally()
+  function muatDariApi() {
+    setSedangMemuat(true);
+    setPesanError("");
+
+    ambilTugasDariApi(10)
+      .then((hasil) => {
+        // Buang data API lama (id berawalan "api-"), pasang yang baru di depan
+        setDaftarTugas((lama) => [...hasil, ...lama.filter((t) => !t.id.startsWith("api-"))]);
+      })
+      .catch((error: Error) => {
+        setPesanError(error.message);
+      })
+      .finally(() => {
+        setSedangMemuat(false);
+      });
+  }
+
   return (
-    <TugasContext.Provider value={{ daftarTugas, tambahTugas, ubahStatus, hapusTugas }}>
+    <TugasContext.Provider
+      value={{ daftarTugas, sedangMemuat, pesanError, tambahTugas, ubahStatus, hapusTugas, muatDariApi }}
+    >
       {children}
     </TugasContext.Provider>
   );
