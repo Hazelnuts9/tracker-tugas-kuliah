@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { View, Text, TextInput, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { styles } from "@/app/constants/styles";
@@ -14,6 +14,13 @@ export default function TambahTugas() {
   const [deadline, setDeadline] = useState("");
   const [pesanError, setPesanError] = useState("");
 
+  // Pesan error hilang otomatis saat salah satu kolom diubah
+  useEffect(() => {
+    if (pesanError !== "") {
+      setPesanError("");
+    }
+  }, [judul, matkul, deadline]);
+
   function simpan() {
     if (judul.trim() === "" || matkul.trim() === "" || deadline.trim() === "") {
       setPesanError("Semua kolom wajib diisi");
@@ -28,7 +35,7 @@ export default function TambahTugas() {
       <Text style={styles.label}>Judul Tugas</Text>
       <TextInput
         style={styles.inputForm}
-        placeholder="Contoh: Laporan Praktikum Modul 2"
+        placeholder="Contoh: Laporan Praktikum Modul 3"
         value={judul}
         onChangeText={setJudul}
       />
@@ -44,7 +51,7 @@ export default function TambahTugas() {
       <Text style={styles.label}>Deadline</Text>
       <TextInput
         style={styles.inputForm}
-        placeholder="Format: 2026-10-30"
+        placeholder="Format: 2026-11-30"
         value={deadline}
         onChangeText={setDeadline}
       />

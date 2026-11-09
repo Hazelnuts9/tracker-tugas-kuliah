@@ -1,13 +1,9 @@
+import { useState, useEffect } from "react";
+import { View, Text, Pressable } from "react-native";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { styles } from "@/app/constants/styles";
 import { useTugas } from "@/context/TugasContext";
-import {
-    getDeadlineColor,
-    getStatusColor,
-    getStatusLabel,
-} from "@/utils/status";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { getStatusColor, getStatusLabel, getDeadlineColor } from "@/utils/status";
 
 export default function DetailTugas() {
   const router = useRouter();
@@ -43,10 +39,7 @@ export default function DetailTugas() {
     return (
       <View style={styles.container}>
         <Text style={styles.detailBaris}>Tugas tidak ditemukan</Text>
-        <Pressable
-          style={[styles.tombol, styles.tombolSekunder]}
-          onPress={kembali}
-        >
+        <Pressable style={[styles.tombol, styles.tombolSekunder]} onPress={kembali}>
           <Text style={styles.tombolText}>Kembali</Text>
         </Pressable>
       </View>
@@ -58,26 +51,11 @@ export default function DetailTugas() {
       <View style={styles.card}>
         <Text style={styles.detailJudul}>{tugas.judul}</Text>
         <Text style={styles.detailBaris}>Mata kuliah: {tugas.matkul}</Text>
-        <Text
-          style={[
-            styles.detailBaris,
-            { color: getDeadlineColor(tugas.status) },
-          ]}
-        >
+        <Text style={[styles.detailBaris, { color: getDeadlineColor(tugas.status) }]}>
           Deadline: {tugas.deadline}
         </Text>
-        <View
-          style={{
-            alignSelf: "flex-start",
-            backgroundColor: getStatusColor(tugas.status),
-            borderRadius: 8,
-            paddingHorizontal: 10,
-            paddingVertical: 4,
-          }}
-        >
-          <Text style={{ color: "white", fontSize: 13 }}>
-            {getStatusLabel(tugas.status)}
-          </Text>
+        <View style={{ alignSelf: "flex-start", backgroundColor: getStatusColor(tugas.status), borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 }}>
+          <Text style={{ color: "white", fontSize: 13 }}>{getStatusLabel(tugas.status)}</Text>
         </View>
       </View>
 
@@ -90,18 +68,12 @@ export default function DetailTugas() {
           <Text style={styles.tombolText}>Yakin hapus? Tekan lagi</Text>
         </Pressable>
       ) : (
-        <Pressable
-          style={[styles.tombol, styles.tombolBahaya]}
-          onPress={() => setKonfirmasiHapus(true)}
-        >
+        <Pressable style={[styles.tombol, styles.tombolBahaya]} onPress={() => setKonfirmasiHapus(true)}>
           <Text style={styles.tombolText}>Hapus Tugas</Text>
         </Pressable>
       )}
 
-      <Pressable
-        style={[styles.tombol, styles.tombolSekunder]}
-        onPress={kembali}
-      >
+      <Pressable style={[styles.tombol, styles.tombolSekunder]} onPress={kembali}>
         <Text style={styles.tombolText}>Kembali</Text>
       </Pressable>
     </View>

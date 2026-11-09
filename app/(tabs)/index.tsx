@@ -5,6 +5,8 @@ import { styles } from "@/app/constants/styles";
 import { Tugas, StatusTugas } from "@/types/tugas";
 import { useTugas } from "@/context/TugasContext";
 import { daftarStatus, getStatusColor, getStatusLabel, getDeadlineColor } from "@/utils/status";
+import Loading from "@/components/Loading";
+import ErrorMessage from "@/components/ErrorMessage";
 
 // Custom function: hitung jumlah tugas per status (primitive loop for)
 function hitungStatus(daftar: Tugas[], status: StatusTugas): number {
@@ -24,14 +26,15 @@ function tampilkanHello() {
 
 export default function Index() {
   const router = useRouter();
-  const { daftarTugas } = useTugas();
+  const { daftarTugas, sedangMemuat, pesanError, muatDariApi } = useTugas();
 
   // State: teks pencarian
   const [kataKunci, setKataKunci] = useState("");
 
-  // useEffect dengan [] : jalan sekali saat halaman pertama dimuat
+  // useEffect dengan [] : jalan sekali saat halaman pertama dimuat -> ambil data dari API
   useEffect(() => {
     console.log("Halaman daftar tugas dimuat");
+    muatDariApi();
   }, []);
 
   // useEffect dengan [kataKunci] : jalan setiap kata kunci berubah
@@ -66,10 +69,25 @@ export default function Index() {
         ))}
       </View>
 
-      {/* router.push: pindah ke halaman tambah (ditumpuk di atas halaman ini) */}
-      <Pressable style={styles.tombol} onPress={() => router.push("/tambah")}>
-        <Text style={styles.tombolText}>+ Tambah Tugas</Text>
-      </Pressable>
+      <View style={{ flexDirection: "row", gap: 8 }}>
+        {/* router.push: pindah ke halaman tambah */}
+        <Pressable style={[styles.tombol, { flex: 1 }]} onPress={() => router.push("/tambah")}>
+          <Text style={styles.tombolText}>+ Tambah Tugas</Text>
+        </Pressable>
+
+        {/* Ambil ulang data dari API */}
+        <Pressable
+          style={[styles.tombol, styles.tombolSekunder, { flex: 1, opacity: sedangMemuat ? 0.5 : 1 }]}
+          onPress={muatDariApi}
+          disabled={sedangMemuat}
+        >
+          <Text style={styles.tombolText}>Muat dari API</Text>
+        </Pressable>
+      </View>
+
+      {/* Status pengambilan data: loading atau error */}
+      {sedangMemuat ? <Loading teks="Mengambil data dari API..." /> : null}
+      {pesanError !== "" ? <ErrorMessage pesan={pesanError} onCoba={muatDariApi} /> : null}
 
       <TextInput
         placeholder="Cari tugas..."
