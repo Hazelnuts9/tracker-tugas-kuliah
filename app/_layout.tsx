@@ -1,5 +1,5 @@
-import { Stack } from "expo-router";
 import { TugasProvider } from "@/context/TugasContext";
+import { Stack } from "expo-router";
 
 export default function RootLayout() {
   return (
@@ -9,7 +9,10 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="detail/[id]" options={{ title: "Detail Tugas" }} />
         <Stack.Screen name="tambah" options={{ title: "Tambah Tugas" }} />
-        <Stack.Screen name="modal" options={{ presentation: "modal", title: "Info Aplikasi" }} />
+        <Stack.Screen
+          name="modal"
+          options={{ presentation: "modal", title: "Info Aplikasi" }}
+        />
       </Stack>
     </TugasProvider>
   );
