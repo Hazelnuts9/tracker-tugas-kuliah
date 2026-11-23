@@ -1,6 +1,7 @@
 import { styles } from "@/app/constants/styles";
 import ErrorMessage from "@/components/ErrorMessage";
 import Loading from "@/components/Loading";
+import { useAuth } from "@/context/AuthContext";
 import { useTugas } from "@/context/TugasContext";
 import { StatusTugas, Tugas } from "@/types/tugas";
 import { daftarStatus, getStatusColor, getStatusLabel } from "@/utils/status";
@@ -61,7 +62,15 @@ function sudahSelesai(status: StatusTugas): boolean {
 
 export default function Index() {
   const router = useRouter();
+  const { user } = useAuth();
   const { daftarTugas, sedangMemuat, pesanError, muatDariApi } = useTugas();
+
+  // Nama user yang login: dari metadata "nama", lalu full_name, lalu bagian depan email
+  const namaUser =
+    user?.user_metadata?.nama ||
+    user?.user_metadata?.full_name ||
+    user?.email?.split("@")[0] ||
+    "";
 
   // State: teks pencarian dan filter status (null = tampilkan semua)
   const [kataKunci, setKataKunci] = useState("");
@@ -127,7 +136,26 @@ export default function Index() {
           <View>
             {/* Header sapaan */}
             <View style={styles.heroBox}>
-              <Text style={styles.heroSapaan}>Halo👋</Text>
+              {/* Tombol ke halaman profil (nama, email, progres, logout) */}
+              <Pressable
+                onPress={() => router.push("/profile")}
+                style={({ pressed }) => ({
+                  alignSelf: "flex-end",
+                  backgroundColor: "rgba(255,255,255,0.2)",
+                  borderRadius: 999,
+                  paddingHorizontal: 14,
+                  paddingVertical: 6,
+                  marginBottom: 6,
+                  opacity: pressed ? 0.6 : 1,
+                })}
+              >
+                <Text style={{ color: "#fff", fontWeight: "600" }}>
+                  👤 Profil
+                </Text>
+              </Pressable>
+              <Text style={styles.heroSapaan}>
+                Halo{namaUser ? `, ${namaUser}` : ""} 👋
+              </Text>
               <Text style={styles.heroRingkasan}>{ringkasanHero}</Text>
             </View>
 

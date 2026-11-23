@@ -1,141 +1,163 @@
-import { useState } from 'react';
+import { supabase } from "@/lib/supabase";
+import { useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  ActivityIndicator,
-  StyleSheet,
-} from 'react-native';
-import { supabase } from '@/lib/supabase';
+    ActivityIndicator,
+    KeyboardAvoidingView,
+    Platform,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [nama, setNama] = useState('');
-  const [isRegistering, setIsRegistering] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [nama, setNama] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
+  const [isRegistering, setIsRegistering] = useState(false);
 
-  const handleAuth = async () => {
-    if (loading) return; // cegah double submit
+  const handleSubmit = async () => {
     setLoading(true);
-    setMessage('');
-    const cleanEmail = email.trim();
+    setMessage("");
 
-    try {
-      if (isRegistering) {
-        const { error } = await supabase.auth.signUp({
-          email: cleanEmail,
-          password,
-          options: { data: { nama: nama.trim() } },
-        });
-        if (error) throw error;
-        setMessage('Pendaftaran berhasil!');
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: cleanEmail,
-          password,
-        });
-        if (error) throw error;
-        // pengalihan layar akan ditangani route guard di _layout.tsx
-      }
-    } catch (e: any) {
-      setMessage(e.message ?? 'Terjadi kesalahan');
-    } finally {
-      setLoading(false);
+    if (isRegistering) {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { nama } },
+      });
+      setMessage(
+        error
+          ? error.message
+          : "Pendaftaran berhasil, cek email untuk verifikasi.",
+      );
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) setMessage(error.message);
     }
+
+    setLoading(false);
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>
-        {isRegistering ? 'Daftar Akun' : 'Masuk'}
-      </Text>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <View style={styles.card}>
+        <Text style={styles.title}>
+          {isRegistering ? "Buat Akun" : "Selamat Datang"}
+        </Text>
+        <Text style={styles.subtitle}>
+          {isRegistering
+            ? "Daftar untuk mulai mencatat tugas"
+            : "Masuk untuk melihat tugas kuliahmu"}
+        </Text>
 
-      {isRegistering && (
+        {isRegistering && (
+          <TextInput
+            style={styles.input}
+            placeholder="Nama lengkap"
+            placeholderTextColor="#9CA3AF"
+            value={nama}
+            onChangeText={setNama}
+          />
+        )}
+
         <TextInput
           style={styles.input}
-          placeholder="Nama"
-          value={nama}
-          onChangeText={setNama}
-          autoCapitalize="words"
-          editable={!loading}
+          placeholder="Email"
+          placeholderTextColor="#9CA3AF"
+          autoCapitalize="none"
+          keyboardType="email-address"
+          value={email}
+          onChangeText={setEmail}
         />
-      )}
 
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        autoCorrect={false}
-        editable={!loading}
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          placeholderTextColor="#9CA3AF"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Password (min. 6 karakter)"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        autoCapitalize="none"
-        editable={!loading}
-      />
+        {!!message && <Text style={styles.message}>{message}</Text>}
 
-      <TouchableOpacity
-        style={[styles.button, loading && styles.buttonDisabled]}
-        onPress={handleAuth}
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.buttonText}>
-            {isRegistering ? 'Daftar' : 'Masuk'}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleSubmit}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>
+              {isRegistering ? "Daftar" : "Masuk"}
+            </Text>
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => {
+            setIsRegistering(!isRegistering);
+            setMessage("");
+          }}
+        >
+          <Text style={styles.link}>
+            {isRegistering
+              ? "Sudah punya akun? Masuk"
+              : "Belum punya akun? Daftar di sini"}
           </Text>
-        )}
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        onPress={() => {
-          setIsRegistering(!isRegistering);
-          setMessage('');
-        }}
-        disabled={loading}
-      >
-        <Text style={styles.link}>
-          {isRegistering
-            ? 'Sudah punya akun? Masuk di sini'
-            : 'Belum punya akun? Daftar di sini'}
-        </Text>
-      </TouchableOpacity>
-
-      {message !== '' && <Text style={styles.message}>{message}</Text>}
-    </View>
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 24, gap: 12 },
-  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 8 },
+  container: {
+    flex: 1,
+    backgroundColor: "#0F172A",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  card: {
+    width: "100%",
+    maxWidth: 420,
+    backgroundColor: "#1E293B",
+    borderRadius: 16,
+    padding: 24,
+    gap: 12,
+  },
+  title: { fontSize: 26, fontWeight: "700", color: "#FFFFFF" },
+  subtitle: { fontSize: 14, color: "#94A3B8", marginBottom: 8 },
   input: {
+    backgroundColor: "#0F172A",
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 12,
+    borderColor: "#334155",
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     fontSize: 16,
+    color: "#FFFFFF",
   },
+  message: { color: "#FBBF24", fontSize: 13 },
   button: {
-    backgroundColor: '#2563eb',
-    borderRadius: 8,
-    padding: 14,
-    alignItems: 'center',
+    backgroundColor: "#2563EB",
+    borderRadius: 10,
+    paddingVertical: 14,
+    alignItems: "center",
+    marginTop: 4,
   },
-  buttonDisabled: { opacity: 0.6 },
-  buttonText: { color: '#fff', fontWeight: '600', fontSize: 16 },
-  link: { textAlign: 'center', color: '#2563eb', marginTop: 4 },
-  message: { textAlign: 'center', marginTop: 8 },
+  buttonText: { color: "#FFFFFF", fontSize: 16, fontWeight: "600" },
+  link: { color: "#60A5FA", textAlign: "center", marginTop: 8 },
 });

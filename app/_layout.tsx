@@ -1,7 +1,8 @@
-import { Slot, useRouter, useSegments } from 'expo-router';
-import { ActivityIndicator, View } from 'react-native';
-import { useEffect } from 'react';
-import { AuthProvider, useAuth } from '@/context/AuthContext';
+import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { TugasProvider } from "@/context/TugasContext";
+import { Slot, useRouter, useSegments } from "expo-router";
+import { useEffect } from "react";
+import { ActivityIndicator, View } from "react-native";
 
 function Guard() {
   const { user, isLoading } = useAuth();
@@ -10,14 +11,14 @@ function Guard() {
 
   useEffect(() => {
     if (isLoading) return; // Rule 1: jangan redirect saat loading
-    const inAuthGroup = segments[0] === '(auth)';
-    if (!user && !inAuthGroup) router.replace('/(auth)/login');
-    else if (user && inAuthGroup) router.replace('/');
+    const inAuthGroup = segments[0] === "(auth)";
+    if (!user && !inAuthGroup) router.replace("/(auth)/login");
+    else if (user && inAuthGroup) router.replace("/");
   }, [user, isLoading, segments]);
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" />
       </View>
     );
@@ -28,7 +29,9 @@ function Guard() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <Guard />
+      <TugasProvider>
+        <Guard />
+      </TugasProvider>
     </AuthProvider>
   );
 }
