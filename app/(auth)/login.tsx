@@ -1,14 +1,14 @@
 import { supabase } from "@/lib/supabase";
 import { useState } from "react";
 import {
-    ActivityIndicator,
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function LoginScreen() {
@@ -20,29 +20,57 @@ export default function LoginScreen() {
   const [isRegistering, setIsRegistering] = useState(false);
 
   const handleSubmit = async () => {
+    if (loading) return; // cegah double submit
+
+    //trim input untuk menghindari spasi di awal/akhir
+    const cleanEmail = email.trim();
+    const cleanNama = nama.trim();
+
+    if (!cleanEmail || !password) {
+      setMessage("Email dan password wajib diisi.");
+      return;
+    }
+    if (isRegistering && !cleanNama) {
+      setMessage("Nama lengkap wajib diisi.");
+      return;
+    }
+    if (isRegistering && password.length < 6) {
+      setMessage("Password minimal 6 karakter.");
+      return;
+    }
+
     setLoading(true);
     setMessage("");
 
-    if (isRegistering) {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { data: { nama } },
-      });
-      setMessage(
-        error
-          ? error.message
-          : "Pendaftaran berhasil, cek email untuk verifikasi.",
-      );
-    } else {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) setMessage(error.message);
-    }
+    try {
+      if (isRegistering) {
+        const { data, error } = await supabase.auth.signUp({
+          email: cleanEmail,
+          password,
+          options: { data: { nama: cleanNama } },
+        });
+        if (error) throw error;
 
-    setLoading(false);
+        // Jika "Confirm email" aktif, session null -> user harus verifikasi dulu.
+        // Jika nonaktif, session langsung ada dan guard akan mengarahkan masuk.
+        setMessage(
+          data.session
+            ? "Pendaftaran berhasil!"
+            : "Pendaftaran berhasil, cek email untuk verifikasi.",
+        );
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: cleanEmail,
+          password,
+        });
+        if (error) throw error;
+        // Pengalihan layar ditangani route guard di app/_layout.tsx
+      }
+    } catch (e: any) {
+      setMessage(e?.message ?? "Terjadi kesalahan, coba lagi.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -65,8 +93,10 @@ export default function LoginScreen() {
             style={styles.input}
             placeholder="Nama lengkap"
             placeholderTextColor="#9CA3AF"
+            autoCapitalize="words"
             value={nama}
             onChangeText={setNama}
+            editable={!loading}
           />
         )}
 
@@ -74,10 +104,12 @@ export default function LoginScreen() {
           style={styles.input}
           placeholder="Email"
           placeholderTextColor="#9CA3AF"
-          autoCapitalize="none"
           keyboardType="email-address"
+          autoCapitalize="none"
+          autoCorrect={false}
           value={email}
           onChangeText={setEmail}
+          editable={!loading}
         />
 
         <TextInput
@@ -85,14 +117,16 @@ export default function LoginScreen() {
           placeholder="Password"
           placeholderTextColor="#9CA3AF"
           secureTextEntry
+          autoCapitalize="none"
           value={password}
           onChangeText={setPassword}
+          editable={!loading}
         />
 
         {!!message && <Text style={styles.message}>{message}</Text>}
 
         <TouchableOpacity
-          style={styles.button}
+          style={[styles.button, loading && styles.buttonDisabled]}
           onPress={handleSubmit}
           disabled={loading}
         >
@@ -106,6 +140,7 @@ export default function LoginScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
+          disabled={loading}
           onPress={() => {
             setIsRegistering(!isRegistering);
             setMessage("");
@@ -158,6 +193,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 4,
   },
+  buttonDisabled: { opacity: 0.6 },
   buttonText: { color: "#FFFFFF", fontSize: 16, fontWeight: "600" },
   link: { color: "#60A5FA", textAlign: "center", marginTop: 8 },
 });

@@ -43,12 +43,16 @@ export default function Profile() {
           ? "Sudah lebih dari separuh, lanjutkan! 💪"
           : "Ayo mulai dicicil pelan-pelan 🚀";
 
-  async function handleLogout() {
-    setKeluar(true);
+async function handleLogout() {
+  if (keluar) return;
+  setKeluar(true);
+  try {
     await supabase.auth.signOut();
-    // Guard di app/_layout.tsx akan otomatis mengarahkan ke halaman login
+    // Guard di app/_layout.tsx otomatis mengarahkan ke halaman login
+  } finally {
     setKeluar(false);
   }
+}
 
   return (
     <ScrollView style={s.container} contentContainerStyle={s.content}>
