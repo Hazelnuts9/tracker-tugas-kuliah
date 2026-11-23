@@ -127,7 +127,7 @@ export default function Index() {
           <View>
             {/* Header sapaan */}
             <View style={styles.heroBox}>
-              <Text style={styles.heroSapaan}>Halo, Nopdek 👋</Text>
+              <Text style={styles.heroSapaan}>Halo👋</Text>
               <Text style={styles.heroRingkasan}>{ringkasanHero}</Text>
             </View>
 
